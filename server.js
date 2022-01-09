@@ -10,6 +10,8 @@
 const express = require('express');
 const PORT = process.env.PORT || 3003;
 var app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const notes = require('./db/db.json');
 
@@ -37,11 +39,26 @@ const notes = require('./db/db.json');
 //     res.json(results); 
 // });
 
+// remove
+function getArray(req, notesArray) {
+    const notesArr = notesArray.filter(note => note.text )
+    return notesArr; 
+}
 
 
 app.get('/api/notes', (req, res) => {
     res.json(notes);
 })
+// remove
+app.get('/api/notes/:id', (req, res) => {
+    const result = getArray(req.params, notes);
+      res.json(result);
+  });
+
+app.post('/api/notes',(req, res) => {
+    console.log(req.body); 
+    res.json(req.body);
+});
 
 app.listen(PORT, () => {
     console.log(`API server is on port ${PORT}!`);
