@@ -1,65 +1,61 @@
 
-// 1. connect and create a web server
-// 2.  get data
-// 3.  allow users to enter data - post data
-// 4. connect html webpage
-// 5.  connect save feature
-// 6.  add ids
-// 7.  delete function
+const fs = require('fs');
+const path = require('path');
+const notes = require('./db/db');
 
 const express = require('express');
 const PORT = process.env.PORT || 3003;
-var app = express();
+
+const app = express();
+app.use(express.static('public'));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const notes = require('./db/db.json');
-
-
-// remove
-// function queries(query, notesArray) {
-//     let queryResults = notesArray;
-
-//     if (query.title) {
-//         queryResults = queryResults.filter(note => note.title === query.title);
-//       }
-//     if (query.text) {
-//         queryResults = queryResults.filter(note => note.text === query.text);
-//       }
-//     return queryResults; 
-
-// }
-
-// remove this 
-// app.get('/api/notes', (req, res) => {
-//     let results = notes;
-//     if (req.query) {
-//         results = queries(req.query, results); 
-//     }
-//     res.json(results); 
-// });
-
-// remove
-function getArray(req, notesArray) {
-    const notesArr = notesArray.filter(note => note.text )
-    return notesArr; 
-}
-
-
+// gets json file 
 app.get('/api/notes', (req, res) => {
     res.json(notes);
-})
-// remove
-app.get('/api/notes/:id', (req, res) => {
-    const result = getArray(req.params, notes);
-      res.json(result);
+});
+ 
+// brings up html pages that display on the website
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'))
+});
+
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/notes.html'));
   });
 
-app.post('/api/notes',(req, res) => {
-    console.log(req.body); 
-    res.json(req.body);
+app.post('/api/notes', (req, res) => {
+    // const newNote = req.body; 
+    let noteInfo = fs.readFileSync('./db/db.json');
+    let parsedNoteInfo = JSON.parse(noteInfo); 
+    parsedNoteInfo.push(req.body);
+
+    fs.writeFile(__dirname + "/db/db.json", JSON.stringify(parsedNoteInfo), (err, data) => {
+        if (err) throw err;
+        //send response back to client
+        res.json(parsedNoteInfo)  
+        
+        
+        // fs.writeFileSync(
+        //     path.join(__dirname, '../data/animals.json'),
+        //     JSON.stringify({ animalsArray }, null, 2)
+        //   );
+        //   return animal;
+        // }
+      }); 
+
+})
+
+// port
+app.listen(PORT, () => {
+    console.log(`Server is on port ${PORT}!`);
 });
 
-app.listen(PORT, () => {
-    console.log(`API server is on port ${PORT}!`);
-});
+
+
+
+
+
+
