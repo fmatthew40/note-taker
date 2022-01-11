@@ -12,6 +12,21 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+function loadNote() {
+    // fs.readFileSync('./db/db.json');
+//     var content;
+// fs.readFile('db/db.json', function read(err, data) {
+//     if (err) {
+//         throw err;
+//     }
+//     content = data;
+// });
+// console.log(content);
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/notes.html'));
+  });
+    };
+
 // gets json file 
 app.get('/api/notes', (req, res) => {
     res.json(notes);
@@ -27,25 +42,18 @@ app.get('/notes', (req, res) => {
   });
 
 app.post('/api/notes', (req, res) => {
-    // const newNote = req.body; 
+    let addId = req.body;
+    addId.id = Date.now();
     let noteInfo = fs.readFileSync('./db/db.json');
     let parsedNoteInfo = JSON.parse(noteInfo); 
     parsedNoteInfo.push(req.body);
 
     fs.writeFile(__dirname + "/db/db.json", JSON.stringify(parsedNoteInfo), (err, data) => {
         if (err) throw err;
-        //send response back to client
         res.json(parsedNoteInfo)  
-        
-        
-        // fs.writeFileSync(
-        //     path.join(__dirname, '../data/animals.json'),
-        //     JSON.stringify({ animalsArray }, null, 2)
-        //   );
-        //   return animal;
-        // }
-      }); 
 
+        loadNote();
+      }); 
 })
 
 // port
